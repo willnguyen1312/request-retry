@@ -3,21 +3,21 @@ export interface RetryRequestOptions {
   shouldRetry?: (context: { currentAttemp: number; error: any }) => boolean;
 }
 
-export type RetryRequest<T> = (
-  request: () => Promise<T>,
-  options?: RetryRequestOptions
-) => Promise<T>;
+interface RequestReturnType<T = unknown, P = unknown> {
+  result: T | undefined;
+  error: P | undefined;
+}
 
-export async function retryRequest<T, P>(
+export async function retryRequest<T = unknown, P = unknown>(
   request: () => Promise<T>,
   options: RetryRequestOptions = {}
-): Promise<{ result: T | null; error: P | null }> {
+): Promise<RequestReturnType<T, P>> {
   const { numOfAttempts = 3, shouldRetry = () => true } = options;
 
   let currentAttemp = 0;
   let continueRetry = true;
-  let result = null;
-  let error = null;
+  let result = undefined;
+  let error = undefined;
 
   while (continueRetry && currentAttemp < numOfAttempts) {
     try {

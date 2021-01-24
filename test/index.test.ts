@@ -1,15 +1,10 @@
 import { retryRequest } from '../src';
 
-const asyncMock = jest
-  .fn()
-  .mockRejectedValueOnce('first failed')
-  .mockRejectedValueOnce('second failed')
-  .mockResolvedValueOnce('second call')
-  .mockRejectedValue('Test');
+const asyncMock = () => Promise.resolve(3)
 
 describe('retryRequest', () => {
   it('should work', async () => {
-    const { error } = await retryRequest<string, string>(() => asyncMock(), {
+    const { error, result } = await retryRequest(() => asyncMock(), {
       numOfAttempts: 3,
     });
     expect(error).toBe('second failed');
