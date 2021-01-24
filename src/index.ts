@@ -8,20 +8,23 @@ export type RetryRequest<T> = (
   options?: RetryRequestOptions
 ) => Promise<T>;
 
-export async function retryRequest<T>(
+export async function retryRequest<T, P>(
   request: () => Promise<T>,
   options: RetryRequestOptions = {}
-): Promise<T> {
+): Promise<{ result: T | null; error: P | null }> {
   const { numOfAttempts = 3, shouldRetry = () => true } = options;
 
-  let currentAttemp = 1;
+  let currentAttemp = 0;
   let continueRetry = true;
+  let result = null;
+  let error = null;
 
   while (continueRetry && currentAttemp < numOfAttempts) {
     try {
-      const result = await request();
-      return result;
-    } catch (error) {
+      result = await request();
+      return { error, result };
+    } catch (err) {
+      error = err;
       currentAttemp += 1;
       continueRetry = shouldRetry({
         currentAttemp,
@@ -29,5 +32,6 @@ export async function retryRequest<T>(
       });
     }
   }
-  return request();
+
+  return { error, result };
 }
