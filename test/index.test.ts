@@ -1,12 +1,12 @@
 import { retryRequest } from '../src';
 
-const asyncMock = () => Promise.resolve(3)
+const asyncMock = () => Promise.resolve('Testing');
 
 describe('retryRequest', () => {
   it('should work', async () => {
-    const { error, result } = await retryRequest(() => asyncMock(), {
+    const result = await retryRequest<string, string>(() => asyncMock(), {
       numOfAttempts: 3,
     });
-    expect(error).toBe('second failed');
+    expect(result.result).toBe('Testing');
   });
 });
